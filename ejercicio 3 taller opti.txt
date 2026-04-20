@@ -1,0 +1,80 @@
+import numpy as np
+from scipy.integrate import odeint
+from scipy.optimize import fsolve
+
+# Datos
+N    = 10000    # poblacion total (constante)
+beta = 0.00003  # tasa de contagio por dia
+gamma = 0.1     # tasa de recuperacion por dia
+I0   = 50       # infectados iniciales (condicion inicial)
+
+
+
+def modelo_SIS(I, t):
+    dIdt = beta * (N - I) * I - gamma * I
+    return dIdt
+
+
+
+def equilibrio(I):
+    return beta * (N - I) * I - gamma * I
+
+x0 = [5000]
+
+
+resultado = fsolve(equilibrio, x0, full_output=True)
+I_eq = resultado[0][0]
+
+
+
+t = np.linspace(0, 200, 1000)
+
+
+solucion = odeint(modelo_SIS, I0, t)
+I_sol = solucion[:, 0]
+
+
+# Resultados
+
+print(" Epidemia en una Ciudad")
+
+
+print(f"Estado: {'Optimo encontrado'}")
+print()
+print(f"Parametros del modelo:")
+print(f"  Poblacion total  : N     = {N} habitantes")
+print(f"  Tasa de contagio : beta  = {beta}")
+print(f"  Tasa recuperacion: gamma = {gamma}")
+print(f"  Infectados dia 0 : I(0)  = {I0}")
+print()
+
+
+print(f"{'Dia':<10} {'Infectados I(t)':>18} {'Susceptibles S(t)':>20}")
+print("-" * 52)
+dias_tabla = [0, 10, 20, 30, 50, 75, 100, 150, 200]
+for dia in dias_tabla:
+    idx = int(dia / 200 * 999)
+    I_val = I_sol[idx]
+    S_val = N - I_val
+    print(f"{dia:<10} {I_val:>18.2f} {S_val:>20.2f}")
+
+print(" = " * 15)
+
+
+print()
+print(f"Puntos de equilibrio:")
+print(f"  Equilibrio 1 (libre de enfermedad) : I* = 0")
+print(f"  Equilibrio 2 (endemico)            : I* = N - gamma/beta = {N} - {gamma/beta:.2f} = {I_eq:.2f}")
+print()
+print(f"  Valor teorico : I* = {N - gamma/beta:.4f}")
+print(f"  Valor fsolve  : I* = {I_eq:.4f}")
+print(" = " * 15)
+
+
+
+dI_eq1 = equilibrio(0)
+dI_eq2 = equilibrio(I_eq)
+print("Verificacion de equilibrios (dI/dt debe ser = 0):")
+print(f"  dI/dt en I* = 0      : {dI_eq1:.6f}")
+print(f"  dI/dt en I* = {I_eq:.2f} : {dI_eq2:.6f}")
+print(" = " * 15)

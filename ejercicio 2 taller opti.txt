@@ -1,0 +1,65 @@
+import numpy as np
+from scipy.optimize import fsolve
+
+#Datos iniciales
+S0 = 200 #numero de sillas en la semana 0
+M0 = 80 # numero de mesas en la semana 0
+
+#funcion
+
+def sistema(x):
+  S , M = x[0], x[1]
+  S_xsemana = 0.6*S + 0.2*M + 40
+  M_xsemana = 0.1*S + 0.5*M + 20
+  return S_xsemana, M_xsemana
+
+#ecuaciones de equilibrio
+
+def equilibrio(x):
+  S , M = x[0], x[1]
+  equilibrio1 = 0.4*S - 0.2*M - 40
+  equilibrio2 = 0.5*M - 0.1*S - 20
+  return [equilibrio1, equilibrio2]
+
+#punto inicial
+x0 = [100, 50]
+
+#resolver equilibrio
+resultado = fsolve(equilibrio, x0, full_output=True)
+S_equ, M_equ = resultado[0]
+
+
+#semanas siluadas
+
+print("Ejercicio produccion semanal de una fabrica")
+print("=" * 15)
+
+print(f"Estado:{'Optimo encontrado'}")
+print()
+print(f"condiciones iniciales: S0 = {S0} sillas | M0 = {M0} mesas")
+print()
+
+S, M = S0, M0
+print(f"{'Semana':<10} {'Sillas (S)' :>14} {'Mesas (M)' :>14}")
+print("-" * 42)
+print(f"{'0':<10} {S:>14.2f} {M:>14.2f}")
+
+for n in range(1, 11):
+  S, M = sistema([S, M])
+  print(f"{n:<10} {S:>14.2f} {M:>14.2f}")
+
+print(" = " * 15)
+
+print()
+print(f"Valores de equilibrio (S*, M*):")
+print(f"  Sillas : S* = {S_equ:.4f}")
+print(f"  Mesas  : M* = {M_equ:.4f}")
+print(" = " * 15)
+
+
+
+S_ver, M_ver = sistema([S_equ, M_equ])
+print("Verificacion del equilibrio:")
+print(f"  S_{{n+1}} = {S_ver:.4f}  (debe ser igual a S* = {S_equ:.4f})")
+print(f"  M_{{n+1}} = {M_ver:.4f}  (debe ser igual a M* = {M_equ:.4f})")
+print(" = " * 15)

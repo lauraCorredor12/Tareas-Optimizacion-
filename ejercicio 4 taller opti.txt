@@ -1,0 +1,73 @@
+import numpy as np
+from scipy.optimize import fsolve
+
+# Datos
+K  = 1000   # capacidad maxima de la laguna (peces)
+r  = 0.4    # tasa de crecimiento intrinseca
+H  = 80     # peces extraidos por año (pesca controlada)
+P0 = 400    # poblacion inicial
+
+
+
+def modelo_pesca(P):
+    return P + r * P * (1 - P / K) - H
+
+
+
+
+def equilibrio(P):
+    return r * P * (1 - P / K) - H
+
+
+P_eq1 = fsolve(equilibrio, [700])[0]   
+P_eq2 = fsolve(equilibrio, [300])[0]   
+
+
+# Resultados
+print(" = " * 45)
+print(" Modelo Logistico de Pesca")
+print(" = " * 15)
+
+print(f"Estado: {'Optimo encontrado'}")
+print()
+print(f"Parametros del modelo:")
+print(f"  Capacidad maxima : K = {K} peces")
+print(f"  Tasa crecimiento : r = {r}")
+print(f"  Pesca anual      : H = {H} peces/año")
+print(f"  Poblacion inicial: P0 = {P0} peces")
+print()
+
+
+print(f"{'Año':<10} {'Poblacion P_n':>16}")
+print("-" * 30)
+P = P0
+print(f"{'0':<10} {P:>16.4f}")
+for n in range(1, 21):   
+    P = modelo_pesca(P)
+    if P < 0:
+        print(f"{n:<10} {'EXTINCION':>16}")
+        break
+    print(f"{n:<10} {P:>16.4f}")
+
+print(" = " * 15)
+
+print()
+print(f"Puntos de equilibrio (P*^2 - {K}*P* + {H*K/r:.0f} = 0):")
+print(f"  Equilibrio estable   (alto): P1* = {P_eq1:.4f} peces")
+print(f"  Equilibrio inestable (bajo): P2* = {P_eq2:.4f} peces")
+print(" = " * 15)
+
+
+# Verificacion
+dP_eq1 = equilibrio(P_eq1)
+dP_eq2 = equilibrio(P_eq2)
+print("Verificacion de equilibrios (r*P*(1-P/K)-H debe ser = 0):")
+print(f"  En P1* = {P_eq1:.2f} : {dP_eq1:.6f}")
+print(f"  En P2* = {P_eq2:.2f} : {dP_eq2:.6f}")
+print(" = " * 15)
+
+# Advertencia de colapso
+print()
+print(f"ADVERTENCIA: Si P_n < {P_eq2:.1f} peces,")
+print(f"  la pesca supera el crecimiento natural --> COLAPSO DE LA POBLACION")
+print(" = " * 15)
